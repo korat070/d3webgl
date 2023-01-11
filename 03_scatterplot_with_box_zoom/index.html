@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>D3 ScatterPlot</title>
+    <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+    <div class="scatter-container">
+        <div class="tools">
+            <button id="reset">Reset</button>
+            <button id="zoom">Zoom</button>
+            <button id="brush" class="active">Brush</button>
+        </div>
+    </div>
+
+    <div></div>
+    <script src="https://unpkg.com/fxjs/dist/fx.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="./plot.js"></script>
+    <script>
+        const {L, C} = window._;
+
+        // const getData = (index, size)
+        const makeParam = size => [...d3.range(0, size, 1000), size]
+        const getData = page => new Promise(
+            resolve => setTimeout(() => resolve(page * 100), 1000)
+        );
+
+        const param = makeParam(3004)
+        _.log(param);
+
+        _.go(
+            param,
+            C.map(getData),
+            _.flat,
+            _.log
+        )
+
+
+
+
+
+    </script>
+
+</body>
+</html>
