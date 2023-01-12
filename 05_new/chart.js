@@ -8,37 +8,41 @@ const width = outerWidth - margin.left - margin.right;
 const height = outerHeight - margin.top - margin.bottom;
 
 export class Chart {
-    constructor(containerSelector) {
+    constructor(data) {
 
         this.lastTransform = null;
         this.lastSelection = null;
         this.lastXdomain = null;
         this.lastYdomain = null;
         this.brushStartPoint = null;
-
-        this.container = d3.select(containerSelector);
-        this.wrapper = this.container
-            .append("div")
+        this.wrapper = d3.select('#chart-area')
+        this.container = this.wrapper.append("div").attr('class', 'scatter-container');
+        this.svgChart = this.container.append('svg:svg')
             .attr('width', outerWidth)
             .attr('height', outerHeight)
-
-        this.svgChart = this.wrapper
-            .append('svg:svg')
-            .attr('width', outerWidth)
-            .attr('height', outerHeight)
-            .style('z-index', 1)
+            .style('z-index', 2)
             .attr('class', 'svg-plot')
             .append('g')
             .attr('transform', `translate(${margin.left}, ${margin.top})`)
             .on('dblclick', this.resetZoom.bind(this));
 
-        this.canvasChart = this.wrapper.append('canvas')
+        this.canvasChart = this.container.append('canvas')
+            .attr('width', width)
+            .attr('height', height)
+            .style('z-index', 1)
+            .style('margin-left', margin.left + 'px')
+            .style('margin-top', margin.top + 'px')
+            .attr('class', 'canvas-plot');
+
+       /* this.image = this.container.append('img')
             .attr('width', width)
             .attr('height', height)
             .style('z-index', 0)
             .style('margin-left', margin.left + 'px')
             .style('margin-top', margin.top + 'px')
-            .attr('class', 'canvas-plot');
+            .attr('class', 'canvas-plot')
+            .attr('src', './img/mailchimp-0qnRfgnZIsI-unsplash.jpg')*/
+
 
 
         this.context = this.canvasChart.node().getContext('2d');
@@ -110,15 +114,28 @@ export class Chart {
         this.lastYdomain = scaleY.domain();
 
 
-        let selectedPoint = getSelectedPoint.call(this, groupId);
+        let selectedPoint = getSelectedPoint.call(this, null);
 
         console.log("size : ", selectedPoint.length);
-        console.log("selectedPoint : ", selectedPoint);
+        // console.log("selectedPoint : ", selectedPoint);
 
-        dataExample.forEach(point => {
-            this.drawPoint(scaleX, scaleY, point, transform.k, groupId);
-        });
 
+        let img = new Image();
+        img.src = "./img/mailchimp-0qnRfgnZIsI-unsplash.jpg";
+
+        img.onload = () => {
+
+            const px = scaleX(0);
+            const py = scaleY(1000);
+
+            console.log(px, py);
+            this.context.drawImage(img, px, py, width * transform.k , height * transform.k);
+
+
+            dataExample.forEach(point => {
+                this.drawPoint(scaleX, scaleY, point, transform.k, groupId);
+            });
+        }
 
         function getSelectedPoint(groupId) {
             let selectedPoint = [];

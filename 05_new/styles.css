@@ -1,5 +1,8 @@
-.scatter-container, .scatter-container2 {
-    margin: auto;
+#chart-area {
+    flex-wrap: nowrap;
+}
+.scatter-container {
+    flex: 0 0 auto;
     width: 800px;
     height: 600px;
 }
@@ -27,4 +30,10 @@
 
 .tools button.active { 
     background-color: #13a613;
+}
+
+img {
+    width: 716px;
+    height: 520px;
+    z-index: 0;
 }
