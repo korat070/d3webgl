@@ -12,20 +12,6 @@ for (let i = 0; i < 10000; i++) {
     sampleData.push([x, y, groupId]);
 }
 
-// _.go(
-//     L.range(100),
-//     L.map(_=>sampleData),
-//     L.map(data => () => new Chart(data)),
-//     L.chunk(4),
-//     L.map(L.map( f => f())),
-//     L.map(C.takeAll),
-//     _.each(
-//         _.each(
-//             _.log
-//         )
-//     )
-// );
-
 
 async function a() {
     await _.go(
