@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lozad/dist/lozad.min.js"></script>
+    <script src="https://unpkg.com/fxjs/dist/fx.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+</head>
+<body>
+
+<script>
+    const {L, C} = window._;
+</script>
+
+병렬처리
+<script>
+    // const {L, C} = window._;
+    // const getData = page => new Promise(
+    //     resolve => {
+    //         setTimeout(() => resolve(`${page}의 데이터`), 500)
+    //
+    //     }
+    // );
+    // _.go(
+    //     _.range(100000),
+    //     L.map( page =>({f: getData, page})),
+    //     L.chunk(10000),
+    //     L.map(L.map(obj =>obj.f(obj.page))),
+    //     L.map(C.takeAll),
+    //     _.each(
+    //         _.log
+    //     )
+    // )
+</script>
+
+
+캔버스 지연로딩
+
+<script>
+
+    async function a() {
+        await _.go(
+            L.interval(1000),
+            L.map((a) => a + 30),
+            L.takeUntil((a) => a == 33),
+            _.each(_.log)
+        );
+    }
+
+    a();
+
+
+</script>
+
+
+
+
+<script>
+
+
+
+
+
+
+
+</script>
+
+
+
+</body>
+</html>

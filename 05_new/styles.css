@@ -5,6 +5,15 @@
     flex: 0 0 auto;
     width: 800px;
     height: 600px;
+    opacity: 1;
+}
+.fade {
+    opacity: 0;
+}
+
+.fade-in {
+    opacity: 1;
+    transition: opacity 0.3s;
 }
 
 .svg-plot, .canvas-plot {
