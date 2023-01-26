@@ -5,7 +5,7 @@ const _ = window._;
 let sampleData = [];
 
 
-for (let i = 0; i < 10000; i++) {
+for (let i = 0; i < 100; i++) {
     const x = Math.floor(Math.random() * 1000) + 1;
     const y = Math.floor(Math.random() * 1000) + 1;
     const groupId = (x % 10) + 1;

@@ -1,0 +1,48 @@
+#chart-area {
+    flex-wrap: nowrap;
+}
+.scatter-container {
+    flex: 0 0 auto;
+    width: 800px;
+    height: 600px;
+    opacity: 1;
+}
+.fade {
+    opacity: 0;
+}
+
+.fade-in {
+    opacity: 1;
+    transition: opacity 0.3s;
+}
+
+.svg-plot, .canvas-plot {
+    position: absolute;
+}
+
+.tools {
+    position: absolute;
+    left: calc(50% + 400px);
+    visibility: hidden;
+}
+
+.tools button {
+    background-color: #e7e7e7;
+    border: none;
+    color: #000000;
+    cursor: pointer;
+    display: block;
+    margin-bottom: 5px;
+    padding: 5px 10px;
+    outline: 0;
+}
+
+.tools button.active { 
+    background-color: #13a613;
+}
+
+img {
+    width: 716px;
+    height: 520px;
+    z-index: 0;
+}

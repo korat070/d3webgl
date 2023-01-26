@@ -3,9 +3,6 @@ let dataExample = [];
 for (let i = 0; i < 10000; i++) {
     const x = Math.floor(Math.random() * 999999) + 1;
     const y = Math.floor(Math.random() * 999999) + 1;
-
-
-
     dataExample.push([x, y]);
 }
 
@@ -123,6 +120,10 @@ const zoom_function = d3.zoom().scaleExtent([1, 1000])
         context.save();
         draw(transform);
         context.restore();
+    })
+    .filter(function () {
+        console.log(d3.event)
+        return d3.event.ctrlKey;
     });
 
 canvasChart.call(zoom_function);

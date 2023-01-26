@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <title>Title</title>
+</head>
+<body>
+<svg>
+</svg>
+
+</body>
+<script src='https://d3js.org/d3.v4.min.js'></script>
+<script>
+
+  const width = 600;
+  const height = 600;
+  let dataExample = [];
+
+  for (let i = 0; i < 1000; i++) {
+    const x = Math.floor(Math.random() * 400) + 1;
+    const y = Math.floor(Math.random() * 400) + 1;
+    dataExample.push([x, y]);
+  }
+
+  // console.log(dataExample)
+  const svg = d3.select('svg')
+          .attr('viewBox', [0, 0, width, height]);
+          //.property("value", []);
+
+  const dot = svg.append('g')
+      .selectAll('circle')
+      .data(dataExample)
+      .enter().append('circle')
+      // .join('circle')
+      .attr('cx', ([x]) => x)
+      .attr('cy', ([, y]) => y)
+      .attr('r', 1.5);
+
+  const zoom = d3.zoom()
+          .extent([[0, 0], [width, height]])
+          .scaleExtent([1, 8])
+          .on('zoom', zoomed)
+          .filter(function (e) {
+            return d3.event.ctrlKey;
+          });
+
+  svg.call(zoom);
+
+  //
+  const brush =
+      d3.brush()
+          .extent([[0, 0], [width, height]])
+          .on("start brush end", brushed);
+
+  svg.append('g').call(brush);
+
+  function zoomed() {
+    const {transform} = d3.event;
+    dot.attr('transform', transform);
+  }
+
+  function brushed() {
+    const {selection} = d3.event;
+    let value = [];
+    if (selection) {
+      const [[x0, y0], [x1, y1]] = selection;
+      value = dot
+          .attr('fill', 'black')
+              .filter(function ([cx, cy]){
+                  return x0 <= cx && cx < x1 && y0 <= cy && cy < y1
+              })
+              .style("fill", "red");
+
+    } else {
+      //dot.style("stroke", "steelblue");
+    }
+    svg.property("value", value).dispatch("input");
+  }
+
+
+</script>
+</html>

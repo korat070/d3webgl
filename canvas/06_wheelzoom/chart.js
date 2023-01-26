@@ -1,5 +1,3 @@
-import {dataExample} from './data.js'
-
 const pointColor = ['#ff85ff', '#aa85ff', '#7785ff', ,'#0085ff']
 const margin = { top: 20, right: 15, bottom: 60, left: 70 };
 const outerWidth = 800;
@@ -8,43 +6,60 @@ const width = outerWidth - margin.left - margin.right;
 const height = outerHeight - margin.top - margin.bottom;
 
 export class Chart {
-    constructor(containerSelector) {
-
+    constructor(data, id) {
+        this.data = data;
         this.lastTransform = null;
         this.lastSelection = null;
         this.lastXdomain = null;
         this.lastYdomain = null;
         this.brushStartPoint = null;
+        this.wrapper = d3.select('#chart-area')
+        this.container = this.wrapper.append("div")
+            .attr('class', 'scatter-container')
+        this.render();
+    }
 
-        this.container = d3.select(containerSelector);
-        this.wrapper = this.container
-            .append("div")
-            .attr('width', outerWidth)
-            .attr('height', outerHeight)
-
-        this.svgChart = this.wrapper
-            .append('svg:svg')
+    render() {
+        this.svgChart = this.container.append('svg:svg')
             .attr('width', outerWidth)
             .attr('height', outerHeight)
             .style('z-index', 1)
             .attr('class', 'svg-plot')
             .append('g')
             .attr('transform', `translate(${margin.left}, ${margin.top})`)
-            .on('dblclick', this.resetZoom.bind(this));
+            .on('dblclick', this.resetZoom.bind(this))
+            .on('click', () => {
+                // console.log(d3.event);
+                // const scaleX = this.lastTransform.rescaleX(this.x);
+                // const scaleY = this.lastTransform.rescaleY(this.y);
+                // console.log(d3.event.x, d3.event.y);
+                // console.log(this.x(d3.event.x), this.y(d3.event.y));
 
-        this.canvasChart = this.wrapper.append('canvas')
+            })
+
+        this.canvasChart = this.container.append('canvas')
             .attr('width', width)
             .attr('height', height)
-            .style('z-index', 0)
+            .style('z-index', 2)
             .style('margin-left', margin.left + 'px')
             .style('margin-top', margin.top + 'px')
-            .attr('class', 'canvas-plot');
+            .attr('class', 'canvas-plot')
+
+        /* this.image = this.container.append('img')
+             .attr('width', width)
+             .attr('height', height)
+             .style('z-index', 0)
+             .style('margin-left', margin.left + 'px')
+             .style('margin-top', margin.top + 'px')
+             .attr('class', 'canvas-plot')
+             .attr('src', './img/mailchimp-0qnRfgnZIsI-unsplash.jpg')*/
+
 
 
         this.context = this.canvasChart.node().getContext('2d');
 
-        this.x = d3.scaleLinear().domain([0, d3.max(dataExample, (d) => d[0])]).range([0, width]).nice();
-        this.y = d3.scaleLinear().domain([0, d3.max(dataExample, (d) => d[1])]).range([height, 0]).nice();
+        this.x = d3.scaleLinear().domain([0, d3.max(this.data, (d) => d[0])]).range([0, width]).nice();
+        this.y = d3.scaleLinear().domain([0, d3.max(this.data, (d) => d[1])]).range([height, 0]).nice();
 
         this.xAxis = d3.axisBottom(this.x);
         this.yAxis = d3.axisLeft(this.y);
@@ -94,7 +109,6 @@ export class Chart {
         //console.log(this.lastXdomain);
         //console.log(this.lastYdomain);
     }
-
     draw (transform, groupId) {
 
         this.lastTransform = transform;
@@ -110,20 +124,33 @@ export class Chart {
         this.lastYdomain = scaleY.domain();
 
 
-        let selectedPoint = getSelectedPoint.call(this, groupId);
+        let selectedPoint = getSelectedPoint.call(this, null);
 
-        console.log("size : ", selectedPoint.length);
-        console.log("selectedPoint : ", selectedPoint);
+        // console.log("size : ", selectedPoint.length);
+        // console.log("selectedPoint : ", selectedPoint);
 
-        dataExample.forEach(point => {
-            this.drawPoint(scaleX, scaleY, point, transform.k, groupId);
-        });
 
+        let img = new Image();
+        img.src = "./img/mailchimp-0qnRfgnZIsI-unsplash.jpg";
+
+        img.onload = () => {
+
+            const px = scaleX(0);
+            const py = scaleY(1000);
+
+            // console.log(px, py);
+            this.context.drawImage(img, px, py, width * transform.k , height * transform.k);
+
+
+            this.data.forEach(point => {
+                this.drawPoint(scaleX, scaleY, point, transform.k, groupId);
+            });
+        }
 
         function getSelectedPoint(groupId) {
             let selectedPoint = [];
             if (this.lastTransform.k != 1 && groupId ) {
-                selectedPoint = dataExample.filter(point => isBrushed.call(this, point));
+                selectedPoint = this.data.filter(point => isBrushed.call(this, point));
             }
             return selectedPoint;
         }
