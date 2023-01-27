@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+<script>
+
+    // function getBase64Image(img) {
+    //     var canvas = document.createElement("canvas");
+    //     canvas.width = img.width;
+    //     canvas.height = img.height;
+    //     var ctx = canvas.getContext("2d");
+    //     ctx.drawImage(img, 0, 0);
+    //     var dataURL = canvas.toDataURL("image/png");
+    //     console.log(dataURL);
+    //
+    //
+    //     return dataURL.replace(/^data:image\/?[A-z]*;base64,/);
+    // }
+    //
+    //
+    // var base64 = getBase64Image(document.querySelector('img'));
+    //
+    // console.log(base64);
+
+
+    const getBase64FromUrl = async (url) => {
+        const data = await fetch(url);
+        const blob = await data.blob();
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(blob);
+            reader.onloadend = () => {
+                const base64data = reader.result;
+                resolve(base64data);
+            }
+        });
+    }
+
+    const aa = getBase64FromUrl("http://localhost:5500/image-server/img/1.jpg")
+
+    console.log(aa);
+
+    // var img = document.querySelector("img"); // img 태그 객체
+    //
+    // var bstr = atob(img.src.split(",")[1]);
+    // var n = bstr.length;
+    // var u8arr = new Uint8Array(n);
+    //
+    // while(n--) {
+    //     u8arr[n] = bstr.charCodeAt(n);
+    // }
+    //
+    // var file = new File([u8arr], "파일이름", {type:"mime"});
+
+</script>
+</body>
+</html>

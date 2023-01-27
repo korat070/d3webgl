@@ -3,79 +3,123 @@
 <head>
     <meta charset='UTF-8'>
     <title>Title</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<svg>
-</svg>
+<div id="chart-area">
+</div>
 
 </body>
 <script src='https://d3js.org/d3.v4.min.js'></script>
 <script>
 
-  const width = 600;
-  const height = 600;
-  let dataExample = [];
+    const pointColor = ['#ff85ff', '#aa85ff', '#7785ff', , '#0085ff']
+    const margin = {top: 20, right: 15, bottom: 60, left: 70};
+    const outerWidth = 800;
+    const outerHeight = 600;
+    const width = outerWidth - margin.left - margin.right;
+    const height = outerHeight - margin.top - margin.bottom;
 
-  for (let i = 0; i < 1000; i++) {
-    const x = Math.floor(Math.random() * 400) + 1;
-    const y = Math.floor(Math.random() * 400) + 1;
-    dataExample.push([x, y]);
-  }
+    let dataExample = [];
 
-  // console.log(dataExample)
-  const svg = d3.select('svg')
-          .attr('viewBox', [0, 0, width, height]);
-          //.property("value", []);
-
-  const dot = svg.append('g')
-      .selectAll('circle')
-      .data(dataExample)
-      .enter().append('circle')
-      // .join('circle')
-      .attr('cx', ([x]) => x)
-      .attr('cy', ([, y]) => y)
-      .attr('r', 1.5);
-
-  const zoom = d3.zoom()
-          .extent([[0, 0], [width, height]])
-          .scaleExtent([1, 8])
-          .on('zoom', zoomed)
-          .filter(function (e) {
-            return d3.event.ctrlKey;
-          });
-
-  svg.call(zoom);
-
-  //
-  const brush =
-      d3.brush()
-          .extent([[0, 0], [width, height]])
-          .on("start brush end", brushed);
-
-  svg.append('g').call(brush);
-
-  function zoomed() {
-    const {transform} = d3.event;
-    dot.attr('transform', transform);
-  }
-
-  function brushed() {
-    const {selection} = d3.event;
-    let value = [];
-    if (selection) {
-      const [[x0, y0], [x1, y1]] = selection;
-      value = dot
-          .attr('fill', 'black')
-              .filter(function ([cx, cy]){
-                  return x0 <= cx && cx < x1 && y0 <= cy && cy < y1
-              })
-              .style("fill", "red");
-
-    } else {
-      //dot.style("stroke", "steelblue");
+    for (let i = 0; i < 500; i++) {
+        const x = Math.floor(Math.random() * 300) + 1;
+        const y = Math.floor(Math.random() * 200) + 1;
+        dataExample.push([x, y]);
     }
-    svg.property("value", value).dispatch("input");
-  }
+
+    const wrapper = d3.select('#chart-area')
+    const container = wrapper.append("div")
+        .attr('class', 'scatter-container')
+
+    // console.log(dataExample)
+    const svg = container.append('svg')
+        .attr('width', outerWidth)
+        .attr('height', outerHeight)
+        .attr('class', 'svg-plot')
+        .append('g')
+        .attr('transform', `translate(${margin.left}, ${margin.top})`)
+
+    // .attr('viewBox', [0, 0, outerWidth, outerHeight]);
+    //.property("value", []);
+
+    const xScale = d3.scaleLinear().domain([0, d3.max(dataExample, (d) => d[0])]).range([0, width]);
+    const yScale = d3.scaleLinear().domain([0, d3.max(dataExample, (d) => d[1])]).range([height, 0]);
+
+    const xAxis = d3.axisBottom(xScale);
+    const yAxis = d3.axisLeft(yScale);
+
+    const gxAxis = svg.append('g')
+        .attr('transform', `translate(0, ${height})`)
+        .call(xAxis);
+
+    const gyAxis = svg.append('g')
+        .call(yAxis);
+
+    svg.append('text')
+        .attr('x', `-${height / 2}`)
+        .attr('dy', '-3.5em')
+        .attr('transform', 'rotate(-90)')
+        .text('Axis Y');
+
+    svg.append('text')
+        .attr('x', `${width / 2}`)
+        .attr('y', `${height + 40}`)
+        .text('Axis X');
+
+    const dot = svg.append('g')
+        .selectAll('circle')
+        .data(dataExample)
+        .enter().append('circle')
+        // .join('circle')
+        .attr('cx', ([x]) => xScale(x))
+        .attr('cy', ([, y]) => yScale(y))
+        .attr('r', 1.5);
+
+    const zoom = d3.zoom()
+        .extent([[0, 0], [width, height]])
+        .scaleExtent([1, 8])
+        .on('zoom', zoomed)
+    // .filter(function (e) {
+    //   return d3.event.ctrlKey;
+    // });
+
+    svg.call(zoom);
+
+    //
+    const brush =
+        d3.brush()
+            .extent([[0, 0], [width, height]])
+            .on("start brush end", brushed);
+
+    svg.append('g').call(brush);
+
+    function zoomed() {
+        const {transform} = d3.event;
+        dot.attr('transform', transform);
+    }
+
+    function brushed() {
+        const {selection} = d3.event;
+        let value = [];
+        if (selection) {
+            const [[x0, y0], [x1, y1]] = selection;
+            // console.log(selection)
+            value = dot
+                .attr('fill', 'black')
+                .filter(function ([cx, cy]) {
+                    console.log("x : ", xScale(cx), "y : ", yScale(cy));
+                    const x = xScale(cx);
+                    const y = yScale(cy);
+                    return x0 <= x && x < x1 && y0 <= y && y < y1
+                })
+                .style("fill", "red");
+
+        } else {
+            //dot.style("stroke", "steelblue");
+        }
+        svg.property("value", value).dispatch("input");
+    }
 
 
 </script>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+	<meta charset="UTF-8">
+	<script type="text/javascript" src="./jszip/jszip.min.js"></script>
+	<script type="text/javascript" src="./jszip/jszip-utils.min.js"></script>
+	<!--[if IE]
+	<script type="text/javascript" src="/jszip/jszip-utils.ie.min.js"></script>
+	<![endif]-->
+	
+	<!-- 다운로드처리용 -->
+	<script type="text/javascript" src="./jszip/download.js"></script>
+	<script type="text/javascript">
+
+	var zip = new JSZip();
+
+	// 사용자가 파일을 선택하면 어떤 파일들인지 보여준다.
+	function update_zip_list() {
+		var html = '<table border="1">';
+		zip.forEach(
+			function( relativePath, entry )
+			{
+				//html += relativePath;
+				html += '<tr>';
+				
+				html += '<td>' + entry.name + '</td>';
+				html += '<td>' + ( entry.dir ? 'dir' : 'file' ) + '</td>'; 
+				
+				html += '</tr>';
+			}
+		);
+		html += '</table>'
+		zip_list.innerHTML = html;
+	}
+	
+	
+	// 사용자가 파일(들)을 선택하면 압축대상으로 넣고, 파일목록을 보여주는 코드를 수행한다.
+	function fileDownload() {
+
+		const fileUrls = [
+				'http://localhost:5500/image-server/img/1.jpg',
+				'http://localhost:5500/image-server/img/2.jpg',
+				'http://localhost:5500/image-server/img/3.jpg',
+				'http://localhost:5500/image-server/img/4.jpg',
+				'http://localhost:5500/image-server/img/5.png',
+				'http://localhost:5500/image-server/img/6.png',
+		]
+
+		fileUrls.forEach((value, index) => {
+			let file = getFile(value);
+			file.then(res => {
+				zip.file( res.name, res );
+			})
+		})
+
+		async function getFile(url) {
+			const response = await fetch(url);
+			const data = await response.blob();
+			const ext = url.split(".").pop(); // url 구조에 맞게 수정할 것
+			const filename = url.split("/").pop(); // url 구조에 맞게 수정할 것
+			const metadata = { type: `image/${ext}` };
+			return new File([data], filename, metadata);
+		}
+	}
+
+	// 압축이 진행되는 과정에 보여줄 메세지
+	function showMessage( msg ) {
+		document.getElementById( 'msg_output' ).innerText = msg;
+	}
+	
+	// 압축이 진행되는 과정에 보여줄 메세지(%를 출력한다.)
+	function updatePercent( percent ) {
+		document.getElementById( 'progress' ).innerText = '' + percent + '%';
+	}
+	
+	
+	// 다운로드를 누르면, 실제 압축이 시작된다.
+	function myOnDownload( evt ) {
+		fileDownload();
+		setTimeout(function () {
+			zip.generateAsync({
+						type: "blob",// "blob" or "base64" or so on.
+						// compression : 기본값은 "STORE"로 되어있어 압축을 하지 않는다.(zip파일에 파일들을 그냥 묶어버리기만 한다.)
+						// 강제로 이 코드를 넣어줘야 압축을 한다.
+						compression: "DEFLATE"
+					},
+
+					// 압축의 진행상황을 사용자에게 보여주기 위한 콜백함수
+					function updateCallback( metadata ) {
+						var msg = "progression : " + metadata.percent.toFixed(2) + " %";
+						if(metadata.currentFile) {
+							msg += ", current file = " + metadata.currentFile;
+						}
+						showMessage(msg);
+						updatePercent(metadata.percent|0);
+					}
+			).then(
+					function( zipContents )
+					{
+						// 압축이 다되면 다운로드를 한다.
+						var filename = 'filename.zip';
+
+						// type에 'base64'로 한경우
+						//download("data:application/octet-stream;base64," + zipContents, filename, "application/octet-stream");
+
+						// type에 'blob'로 한경우
+						download( zipContents, filename, "application/octet-stream");
+					}
+			);
+
+		}, 3000)
+
+	}
+	</script>
+</head>
+</body>
+
+압축할 파일 선택후 [download]버튼을 누르세요..<br />
+[download]버튼을 누른 후 한참 걸릴 수도 있습니다..<br />
+<form>
+<input id="file4upload" type="file"   name="name" multiple />
+<input id="downloadbtn" type="button" value="download" />
+</form>
+<div id="msg_output"></div>
+<div id="progress"></div>
+<div id="zip_list"></div>
+<script type="text/javascript">
+	document.getElementById('downloadbtn').addEventListener('click', myOnDownload);
+</script>
+</body>
+</html>

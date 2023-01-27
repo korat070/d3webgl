@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+
+<script src="jszip.js"></script>
+<!--<a href="https://unsplash.com/photos/cFf7K2WqifE/download?ixid=MnwxMjA3fDB8MXxhbGx8M3x8fHx8fDJ8fDE2NzQ3Nzc2NTY&force=true" download> 파일 다운</a>-->
+<button>
+    파일 다운로드
+</button>
+<script>
+
+
+
+    function download() {
+
+        const filepath = "https://unsplash.com/photos/cFf7K2WqifE/download?ixid=MnwxMjA3fDB8MXxhbGx8M3x8fHx8fDJ8fDE2NzQ3Nzc2NTY&force=true";
+        const fileName = "file.jpg";
+        var element = document.createElement('a');
+        element.setAttribute('href',filepath);
+        element.setAttribute('download', fileName);
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+    }
+
+
+    function DownloadZipFile(arFileArray, sZipFileName) {
+        var Promise = window.Promise;
+
+        if (!Promise) {
+            Promise = JSZip.external.Promise;
+
+        }
+
+        function urlToPromise(url) {
+            return new Promise(function (resolve, reject) {
+                JSZipUtils.getBinaryContent(url, function (err, data) {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(data);
+                    }
+                });
+            });
+        }
+
+
+        if (!JSZip.support.blob) {
+            showError("This demo works only with a recent browser !");
+        }
+        var zip = new JSZip();
+        for (var i = 0; i < arFileArray.length; i++) {
+
+            var url = arFileArray[i];
+
+            var filename = url.replace(/.*\//g, "");
+
+            zip.file(filename, urlToPromise(url), {binary: true});
+
+        }
+        zip.generateAsync({type: "blob"}, function updateCallback(metadata) {
+
+        }).then(function callback(blob) {
+            saveAs(blob, sZipFileName);
+        }, function (e) {
+            showError(e);
+        });
+    }
+</script>
+
+</body>
+</html>
