@@ -39,12 +39,14 @@
         .attr('class', 'svg-plot')
         .append('g')
         .attr('transform', `translate(${margin.left}, ${margin.top})`)
-
-    // .attr('viewBox', [0, 0, outerWidth, outerHeight]);
-    //.property("value", []);
+        .attr('viewBox', [0, 0, width, height]);
 
     const xScale = d3.scaleLinear().domain([0, d3.max(dataExample, (d) => d[0])]).range([0, width]);
     const yScale = d3.scaleLinear().domain([0, d3.max(dataExample, (d) => d[1])]).range([height, 0]);
+
+    let lastXDomain = xScale.domain();
+    let lastYDomain = yScale.domain();
+    let lastTransform = d3.zoomIdentity;
 
     const xAxis = d3.axisBottom(xScale);
     const yAxis = d3.axisLeft(yScale);
@@ -80,47 +82,69 @@
         .extent([[0, 0], [width, height]])
         .scaleExtent([1, 8])
         .on('zoom', zoomed)
-    // .filter(function (e) {
-    //   return d3.event.ctrlKey;
-    // });
+        .filter(function (e) {
+          return d3.event.ctrlKey;
+        });
 
     svg.call(zoom);
 
     //
     const brush =
         d3.brush()
-            .extent([[0, 0], [width, height]])
-            .on("start brush end", brushed);
+            .extent([[-5, -5], [width + 5, height + 5 ]])
+            .on("start brush end", brushed)
 
     svg.append('g').call(brush);
 
     function zoomed() {
         const {transform} = d3.event;
+
+        if (transform.k == 1) {transform.x = 0;transform.y = 0;}
+
+        lastTransform = transform;
         dot.attr('transform', transform);
+
+        const reXScale = lastTransform.rescaleX(xScale);
+        const reYScale = lastTransform.rescaleY(yScale);
+
+        gxAxis.call(xAxis.scale(reXScale));
+        gyAxis.call(yAxis.scale(reYScale));
+
+        lastXDomain = reXScale.domain();
+        lastYDomain = reYScale.domain();
     }
 
     function brushed() {
         const {selection} = d3.event;
-        let value = [];
         if (selection) {
+
             const [[x0, y0], [x1, y1]] = selection;
-            // console.log(selection)
-            value = dot
+
+            const [dx0, dx1] = lastXDomain;
+            const [dy0, dy1] = lastYDomain;
+
+            const kx = (dx1 - dx0) / width;
+            const ky = (dy1 - dy0) / height;
+
+            const tx0 = dx0 + (x0 * kx);
+            const ty0 = dy0 + ((height - y0) * ky)
+            const tx1 = dx0 + (x1 * kx);
+            const ty1 = dy0 + ((height - y1) * ky);
+            // console.log("selectX0: ", x0, "selectY0: ", y0, "selectX1: ", x1, "selectY1: ", y1);
+            // console.log("selectX0: ", dx0 + (x0 * kx) , "selectY0: ", dy0 + ((height - y0) * ky), "selectX1: ", dx0 + (x1 * kx), "selectY1: ", dy0 + ((height- y1) * ky));
+            dot
                 .attr('fill', 'black')
                 .filter(function ([cx, cy]) {
-                    console.log("x : ", xScale(cx), "y : ", yScale(cy));
-                    const x = xScale(cx);
-                    const y = yScale(cy);
-                    return x0 <= x && x < x1 && y0 <= y && y < y1
+                    const selectedPoint = cx >= tx0 && cx < tx1 && cy >= ty1 && cy < ty0;
+                    if (selectedPoint) {
+                        console.log("cx : ", cx, "cy : ", cy)
+                    }
+                    return selectedPoint;
                 })
                 .style("fill", "red");
-
         } else {
-            //dot.style("stroke", "steelblue");
+            dot.style("fill", "black");
         }
-        svg.property("value", value).dispatch("input");
     }
-
-
 </script>
 </html>
